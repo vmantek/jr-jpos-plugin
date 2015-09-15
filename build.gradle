@@ -1,0 +1,25 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+group='com.vmantek.tools'
+version='1.0.0'
+
+repositories {
+    jcenter()
+    maven {url 'https://repos.zeroturnaround.com/nexus/content/groups/zt-public' }
+    mavenLocal()
+}
+
+dependencies {
+    compile ('org.zeroturnaround:jr-sdk:6.2.3')
+    compile ('org.zeroturnaround:jr-utils:6.2.3')
+}
+
+jar {
+    manifest {
+        attributes('JavaRebel-Plugin':'com.vmantek.tools.jrplugins.jpos.JPOSPlugin')
+    }
+}
