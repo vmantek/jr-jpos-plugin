@@ -5,8 +5,9 @@ import org.zeroturnaround.javarebel.integration.monitor.MonitoredResource;
 import org.zeroturnaround.javarebel.integration.util.ResourceUtil;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ public class ResourceReloader
     private static final Method gav;
     private static final Method install;
     private static final Method uninstall;
+    private static Map<String, MonitoredResource> monitoredResources=new HashMap<>();
 
     static
     {
@@ -35,13 +37,25 @@ public class ResourceReloader
         }
     }
 
-    public static void checkReload(Map<String, MonitoredResource> monitoredResources) throws IOException
+    public static void unregisterResource(String entry)
+    {
+        monitoredResources.remove(entry);
+    }
+
+    public static void registerResource(String entry)
+    {
+        ClassLoader cl = ResourceReloader.class.getClassLoader();
+        final Resource res = ResourceUtil.asResource(cl.getResource(entry));
+        final MonitoredResource mr = new MonitoredResource(res, true);
+        monitoredResources.put(entry, mr);
+    }
+
+    public static void checkReload() throws IOException
     {
         try
         {
             Object deployer=getInstance.invoke(null);
 
-            ClassLoader cl = ResourceReloader.class.getClassLoader();
             List<String> entries = getAvailableResources(deployer);
 
             // Check for stale monitored resources
@@ -58,9 +72,7 @@ public class ResourceReloader
                 // Start monitoring new resources
                 if (!monitoredResources.containsKey(entry))
                 {
-                    final Resource res = ResourceUtil.asResource(cl.getResource(entry));
-                    final MonitoredResource mr = new MonitoredResource(res, true);
-                    monitoredResources.put(entry, mr);
+                    registerResource(entry);
                     installResource(deployer, entry);
                     continue;
                 }

@@ -2,13 +2,11 @@ package com.vmantek.tools.jrplugins.jpos.cbp;
 
 import org.zeroturnaround.bundled.javassist.ClassPool;
 import org.zeroturnaround.bundled.javassist.CtClass;
-import org.zeroturnaround.bundled.javassist.CtField;
-import org.zeroturnaround.bundled.javassist.CtMethod;
 import org.zeroturnaround.javarebel.Logger;
 import org.zeroturnaround.javarebel.LoggerFactory;
 import org.zeroturnaround.javarebel.integration.support.JavassistClassBytecodeProcessor;
 
-public class ResourceReloadCBP extends JavassistClassBytecodeProcessor
+public class ResourceRegisterCBP extends JavassistClassBytecodeProcessor
 {
     private static final Logger log = LoggerFactory.getLogger("jPOS");
 
@@ -18,7 +16,10 @@ public class ResourceReloadCBP extends JavassistClassBytecodeProcessor
         cp.importPackage("java.util");
         cp.importPackage("com.vmantek.tools.jrplugins.jpos.util");
 
-        CtMethod scanMethod = ctClass.getDeclaredMethod("scan");
-        scanMethod.insertBefore("ResourceReloader.checkReload();");
+
+        ctClass.getDeclaredMethod("installResource",
+                                  new CtClass[]{cp.get("java.lang.String"),
+                                                ctClass.booleanType})
+        .insertAfter("ResourceReloader.registerResource(resource);");
     }
 }

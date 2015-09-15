@@ -2,6 +2,7 @@ package com.vmantek.tools.jrplugins.jpos;
 
 import com.vmantek.tools.jrplugins.jpos.cbp.DBConfigCBP;
 import com.vmantek.tools.jrplugins.jpos.cbp.GenericPackagerConfigCBP;
+import com.vmantek.tools.jrplugins.jpos.cbp.ResourceRegisterCBP;
 import com.vmantek.tools.jrplugins.jpos.cbp.ResourceReloadCBP;
 import com.vmantek.tools.jrplugins.jpos.util.QBeanReloadListener;
 import org.zeroturnaround.javarebel.ClassResourceSource;
@@ -20,8 +21,11 @@ public class JPOSPlugin implements Plugin
         ClassLoader cl = getClass().getClassLoader();
 
         integration.addIntegrationProcessor(cl, "org.jpos.q2.Q2", new ResourceReloadCBP());
+        integration.addIntegrationProcessor(cl, "com.vmantek.tools.jpos.ResourceDeployer",
+                                            new ResourceRegisterCBP());
         integration.addIntegrationProcessor(cl, "org.jpos.ee.DB", new DBConfigCBP());
-        integration.addIntegrationProcessor(cl, "org.jpos.iso.packager.GenericPackager", new GenericPackagerConfigCBP());
+        integration.addIntegrationProcessor(cl, "org.jpos.iso.packager.GenericPackager",
+                                            new GenericPackagerConfigCBP());
 
         final Reloader reloader = ReloaderFactory.getInstance();
         reloader.addClassReloadListener(new QBeanReloadListener());
