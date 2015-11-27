@@ -5,6 +5,7 @@ import org.zeroturnaround.javarebel.integration.monitor.MonitoredResource;
 import org.zeroturnaround.javarebel.integration.util.ResourceUtil;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.HashMap;
@@ -15,27 +16,7 @@ import java.util.Map;
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class ResourceReloader
 {
-    private static final Method getInstance;
-    private static final Method gav;
-    private static final Method install;
-    private static final Method uninstall;
     private static Map<String, MonitoredResource> monitoredResources=new HashMap<>();
-
-    static
-    {
-        try
-        {
-            Class cls=Class.forName("com.vmantek.tools.jpos.ResourceDeployer");
-            getInstance = cls.getDeclaredMethod("getInstance");
-            gav = cls.getDeclaredMethod("getAvailableResources");
-            install = cls.getDeclaredMethod("installResource",String.class);
-            uninstall = cls.getDeclaredMethod("uninstallResource",String.class);
-        }
-        catch (ClassNotFoundException | NoSuchMethodException e)
-        {
-            throw new RuntimeException("Could not find get class info",e);
-        }
-    }
 
     public static void unregisterResource(String entry)
     {
@@ -50,12 +31,23 @@ public class ResourceReloader
         monitoredResources.put(entry, mr);
     }
 
-    public static void checkReload() throws IOException
+    private static Method getDeployerMethod(String method,Class... args)
+        throws ClassNotFoundException, NoSuchMethodException
+    {
+        Class cls=Class.forName("com.vmantek.jpos.deployer.ResourceDeployer");
+        return cls.getDeclaredMethod(method,args);
+    }
+
+    private static Object getDeployer() throws Exception
+    {
+        return getDeployerMethod("getInstance").invoke(null);
+    }
+
+    public static void checkReload() throws Exception
     {
         try
         {
-            Object deployer=getInstance.invoke(null);
-
+            Object deployer = getDeployer();
             List<String> entries = getAvailableResources(deployer);
 
             // Check for stale monitored resources
@@ -95,7 +87,8 @@ public class ResourceReloader
     {
         try
         {
-            install.invoke(deployer,s);
+            getDeployerMethod("installResource",String.class)
+                .invoke(deployer,s);
         }
         catch (Exception e)
         {
@@ -107,7 +100,8 @@ public class ResourceReloader
     {
         try
         {
-            uninstall.invoke(deployer,s);
+            getDeployerMethod("uninstallResource",String.class)
+                .invoke(deployer,s);
         }
         catch (Exception e)
         {
@@ -119,7 +113,8 @@ public class ResourceReloader
     {
         try
         {
-            return (List<String>) gav.invoke(deployer);
+            return (List<String>) getDeployerMethod("getAvailableResources")
+                .invoke(deployer);
         }
         catch (Exception e)
         {
