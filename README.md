@@ -22,7 +22,7 @@ The approach I use is to have a directory for external JRebel plugins, and to ha
 in $HOME/.jrebel/jrebel.properties as in:
 
 ```
-rebel.plugins=/Users/salaman/Java/jrebel/plugins/jr-jpos-plugin-1.0.0.jar
+rebel.plugins=~/Java/jrebel/plugins/jr-jpos-plugin-1.0.1.jar
 ```
 
 ## Activation
