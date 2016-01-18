@@ -21,7 +21,7 @@ public class JPOSPlugin implements Plugin
         ClassLoader cl = getClass().getClassLoader();
 
         integration.addIntegrationProcessor(cl, "org.jpos.q2.Q2", new ResourceReloadCBP());
-        integration.addIntegrationProcessor(cl, "com.vmantek.tools.jpos.ResourceDeployer",
+        integration.addIntegrationProcessor(cl, "com.vmantek.jpos.deployer.ResourceDeployer",
                                             new ResourceRegisterCBP());
         integration.addIntegrationProcessor(cl, "org.jpos.ee.DB", new DBConfigCBP());
         integration.addIntegrationProcessor(cl, "org.jpos.iso.packager.GenericPackager",
